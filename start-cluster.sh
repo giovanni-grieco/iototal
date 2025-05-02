@@ -1,3 +1,6 @@
-minikube start --memory=4096 --cpus=8 --disk-size=40G 
 kubectl cluster-info
-kubectl create -f stack.yml
+kubectl create namespace big-data
+
+kubectl apply -f hadoop.yml -n big-data
+kubectl apply -f kafka.yml -n big-data
+kubectl apply -f spark.yml -n big-data
