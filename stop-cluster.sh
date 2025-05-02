@@ -1,6 +1,5 @@
-kubectl delete -f hadoop.yml -n big-data
-kubectl delete -f kafka.yml -n big-data
-kubectl delete -f spark.yml -n big-data
-kubectl delete namespace big-data
+kubectl delete -f hadoop.yml
+kubectl delete -f kafka.yml
+kubectl delete -f spark.yml
 
 
