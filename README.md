@@ -10,8 +10,6 @@ A Big Data project for Università Roma Tre
 
 [kubectl](https://kubernetes.io/docs/tasks/tools/)
 
-[helm](https://helm.sh/docs/intro/install/)
-
 ### Run
 To start the cluster
 ```bash
