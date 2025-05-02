@@ -24,6 +24,8 @@ To stop the cluster
 ```
 
 ## Relevant documentation
+[Exposing services utilising Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fdebian+package#Service)
+
 [Kafka on K8](https://learnk8s.io/kafka-ha-kubernetes)
 
 [Submit to Spark on K8](https://apache-spark-on-k8s.github.io/userdocs/running-on-kubernetes.html)
