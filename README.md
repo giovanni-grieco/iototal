@@ -24,3 +24,8 @@ To stop the cluster
 ./stop-cluster.sh
 ./stop-minikube.sh
 ```
+
+## Relevant documentation
+[Kafka on K8](https://learnk8s.io/kafka-ha-kubernetes)
+
+[Submit to Spark on K8](https://apache-spark-on-k8s.github.io/userdocs/running-on-kubernetes.html)
