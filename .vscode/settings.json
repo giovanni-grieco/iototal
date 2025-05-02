@@ -1,5 +1,0 @@
-{
-    "yaml.schemas": {
-        "kubernetes://schema/apps/v1%40deployment": "file:///home/giovanni/Projects/iototal/kafka.yml"
-    }
-}

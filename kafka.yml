@@ -6,10 +6,6 @@ metadata:
     app: kafka-app
 spec:
   clusterIP: None
-  template:
-    metadata:
-      labels:
-        app: kafka-app
   ports:
     - name: '9092'
       port: 9092
