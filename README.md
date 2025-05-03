@@ -15,6 +15,11 @@ A Big Data project for Università Roma Tre
 ./start-minikube.sh
 ./start-cluster.sh
 ```
+
+To allow for outside connection with Kafka, enable minikube tunnel
+```bash
+minikube tunnel #this is a blocking instruction, open a new terminal to leave tunnel opened
+```
 #### To submit a spark job
 ```bash
 ./submit-spark-job.sh path/to/job

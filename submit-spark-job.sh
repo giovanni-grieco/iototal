@@ -8,6 +8,13 @@ fi
 CLUSTER_IP=$(minikube ip)
 SPARK_JOB_FILE=$1
 
+if [ ! -f "$SPARK_JOB_FILE" ]; then
+    echo "File $SPARK_JOB_FILE not found!"
+    exit 1
+fi
+echo "Starting Spark job submission..."
+echo "Cluster IP: $CLUSTER_IP"
+echo "Spark job file: $SPARK_JOB_FILE"
 
 # Create ConfigMap from your Python file
 echo "Creating ConfigMap from spark-job.py..."
