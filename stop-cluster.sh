@@ -1,5 +1,4 @@
-kubectl delete -f kafka.yml
-
+helm uninstall iototal
 #stop HDFS ??
 
 
