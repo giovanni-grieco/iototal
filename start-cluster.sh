@@ -25,5 +25,12 @@ helm install iototal oci://registry-1.docker.io/bitnamicharts/kafka \
     --set listeners.interbroker.protocol=plaintext \
     --set listeners.external.protocol=plaintext \
 
+printf "Remember to start a tunnel to talk outside of cluster\n"
+printf "e.g. minikube tunnel\n"
+
+kubectl apply -f spark-pv.yaml
+
+kubectl create serviceaccount spark
+kubectl create clusterrolebinding spark-role --clusterrole=edit --serviceaccount=default:spark --namespace=default
 
 # Start HDFS??

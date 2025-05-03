@@ -24,8 +24,10 @@ To stop the cluster
 ## Relevant documentation
 [Exposing services utilising Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fdebian+package#Service)
 
-[Kafka on K8](https://learnk8s.io/kafka-ha-kubernetes)
+[Kafka on K8 (general usage and understanding)](https://learnk8s.io/kafka-ha-kubernetes)
 
-[Submit to Spark on K8](https://apache-spark-on-k8s.github.io/userdocs/running-on-kubernetes.html)
+[Bitnami Kafka specific documentation](https://github.com/bitnami/charts/tree/main/bitnami/kafka)
+
+[Submit to Spark on K8](https://spark.apache.org/docs/latest/running-on-kubernetes.html#submitting-applications-to-kubernetes)
 
 [Interacting with Kafka in Python](https://kafka-python.readthedocs.io/en/master/)
