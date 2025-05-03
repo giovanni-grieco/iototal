@@ -8,14 +8,18 @@ A Big Data project for Università Roma Tre
 - [minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [helm](https://helm.sh/docs/intro/install/)
+
 ### Run
-To start the cluster
+#### To start the cluster
 ```bash
 ./start-minikube.sh
 ./start-cluster.sh
 ```
-
-To stop the cluster
+#### To submit a spark job
+```bash
+./submit-spark-job.sh path/to/job
+```
+#### To stop the cluster
 ```bash
 ./stop-cluster.sh
 ./stop-minikube.sh

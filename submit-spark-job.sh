@@ -1,11 +1,18 @@
 #!/bin/bash
 
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <path-to-spark-job.py>"
+    exit 1
+fi
+
 CLUSTER_IP=$(minikube ip)
+SPARK_JOB_FILE=$1
+
 
 # Create ConfigMap from your Python file
 echo "Creating ConfigMap from spark-job.py..."
 kubectl delete configmap spark-job-cm 2>/dev/null || true
-kubectl create configmap spark-job-cm --from-file=spark-job.py=$(pwd)/spark-job.py
+kubectl create configmap spark-job-cm --from-file=spark-job.py=$(pwd)/$SPARK_JOB_FILE
 
 # Create pod template
 cat > driver-pod-template.yaml << EOF
