@@ -37,6 +37,6 @@ minikube tunnel #this is a blocking instruction, open a new terminal to leave tu
 
 [Bitnami Kafka specific documentation](https://github.com/bitnami/charts/tree/main/bitnami/kafka)
 
-[Submit to Spark on K8](https://spark.apache.org/docs/latest/running-on-kubernetes.html#submitting-applications-to-kubernetes)
-
 [Interacting with Kafka in Python](https://kafka-python.readthedocs.io/en/master/)
+
+[Submit to Spark on K8](https://spark.apache.org/docs/latest/running-on-kubernetes.html#submitting-applications-to-kubernetes)
