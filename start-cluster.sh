@@ -28,13 +28,11 @@ helm install iototal oci://registry-1.docker.io/bitnamicharts/kafka \
 printf "Remember to start a tunnel to talk outside of cluster\n"
 printf "e.g. minikube tunnel\n"
 
-kubectl apply -f spark-pv.yaml
-
 kubectl create serviceaccount spark
 kubectl create clusterrolebinding spark-role --clusterrole=edit --serviceaccount=default:spark --namespace=default
 
 echo "=========================================================="
-echo "Minikube started successfully."
+echo "K8 cluster started successfully."
 echo ""
 echo "To enable external access to LoadBalancer services,"
 echo "please run the following command in a separate terminal:"
