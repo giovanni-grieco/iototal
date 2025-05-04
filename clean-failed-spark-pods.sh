@@ -1,1 +1,1 @@
-kubectl delete pod --field-selector=status.phase==Error
+kubectl delete pod --field-selector=status.phase==Failed
