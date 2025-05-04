@@ -8,7 +8,7 @@ A Big Data project for Università Roma Tre
 - [minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [helm](https://helm.sh/docs/intro/install/)
-
+- [pyspark - for submitting spark jobs](https://spark.apache.org/docs/latest/api/python/getting_started/install.html#using-pypi)
 ### Run
 #### To start the cluster
 ```bash
@@ -37,6 +37,8 @@ minikube tunnel #this is a blocking instruction, open a new terminal to leave tu
 
 [Bitnami Kafka specific documentation](https://github.com/bitnami/charts/tree/main/bitnami/kafka)
 
-[Interacting with Kafka in Python](https://kafka-python.readthedocs.io/en/master/)
+[Interacting with Kafka in Python (Not from inside a Spark job)](https://kafka-python.readthedocs.io/en/master/)
 
 [Submit to Spark on K8](https://spark.apache.org/docs/latest/running-on-kubernetes.html#submitting-applications-to-kubernetes)
+
+[Spark Streaming - Submitting Spark Job that interact with Kafka](https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html)

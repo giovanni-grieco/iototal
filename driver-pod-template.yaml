@@ -6,7 +6,11 @@ spec:
     volumeMounts:
     - name: spark-job-volume
       mountPath: /opt/spark/work-dir/job
+    - name: ivy-cache
+      mountPath: /home/spark/.ivy2
   volumes:
   - name: spark-job-volume
     configMap:
       name: spark-job-cm
+  - name : ivy-cache
+    emptyDir: {}

@@ -21,27 +21,12 @@ echo "Creating ConfigMap from spark-job.py..."
 kubectl delete configmap spark-job-cm 2>/dev/null || true
 kubectl create configmap spark-job-cm --from-file=spark-job.py=$(pwd)/$SPARK_JOB_FILE
 
-# Create pod template
-cat > driver-pod-template.yaml << EOF
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: spark-kubernetes-driver
-    volumeMounts:
-    - name: spark-job-volume
-      mountPath: /opt/spark/work-dir/job
-  volumes:
-  - name: spark-job-volume
-    configMap:
-      name: spark-job-cm
-EOF
-
 # Submit the Spark job
 echo "Submitting Spark job..."
 spark-submit \
     --master k8s://https://$CLUSTER_IP:8443 \
     --deploy-mode cluster \
+    --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5 \
     --name iototal-spark \
     --conf spark.executor.instances=1 \
     --conf spark.kubernetes.container.image=apache/spark:latest \
