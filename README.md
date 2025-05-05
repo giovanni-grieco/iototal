@@ -4,7 +4,7 @@ A Big Data project for Università Roma Tre
 ## Local execution
 
 ### Requirements
-- [docker](https://docs.docker.com/get-started/get-docker/) or [docker-engine](https://docs.docker.com/get-started/get-docker/)
+- [docker](https://docs.docker.com/get-started/get-docker/) or [docker-engine](https://docs.docker.com/engine/install/)
 - [minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [helm](https://helm.sh/docs/intro/install/)
@@ -16,14 +16,11 @@ A Big Data project for Università Roma Tre
 ./start-cluster.sh
 ```
 
-To allow for outside connection with Kafka, enable minikube tunnel
-```bash
-minikube tunnel #this is a blocking instruction, open a new terminal to leave tunnel opened
-```
 #### To submit a spark job
 ```bash
 ./submit-spark-job.sh path/to/job
 ```
+
 #### To stop the cluster
 ```bash
 ./stop-cluster.sh

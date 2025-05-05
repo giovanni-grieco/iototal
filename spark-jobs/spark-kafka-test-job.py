@@ -27,7 +27,7 @@ def main():
         .start()
     
     # Run for 60 seconds then exit
-    query.awaitTermination(60)
+    query.awaitTermination(180)
     
     # Gracefully stop the query and spark session
     query.stop()
