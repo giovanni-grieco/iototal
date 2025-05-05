@@ -31,17 +31,6 @@ printf "e.g. minikube tunnel\n"
 kubectl create serviceaccount spark
 kubectl create clusterrolebinding spark-role --clusterrole=edit --serviceaccount=default:spark --namespace=default
 
-echo "=========================================================="
-echo "K8 cluster started successfully."
-echo ""
-echo "To enable external access to LoadBalancer services,"
-echo "please run the following command in a separate terminal:"
-echo ""
-echo "    minikube tunnel"
-echo ""
-echo "This command requires sudo privileges and will continue"
-echo "running until you terminate it with Ctrl+C."
-echo "=========================================================="
-
 
 # Start HDFS??
+# HDFS è nato prima di kubernetes, non è l'ideale, non ci sono soluzioni pre-confezionate a quanto pare
