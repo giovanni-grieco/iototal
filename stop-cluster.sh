@@ -1,5 +1,5 @@
+./clean-all-spark-pods.sh
 helm uninstall iototal
-
 kubectl delete clusterrolebinding spark-role
 kubectl delete serviceaccount spark
 kubectl delete -f k8s/minio-dev.yaml
