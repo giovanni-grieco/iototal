@@ -1,5 +1,5 @@
+#!.venv/bin/python
 from kafka import KafkaConsumer
-
 import os
 
 kafka_server_bash_command = "kubectl get service iototal-kafka-controller-0-external --namespace default -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
@@ -8,7 +8,7 @@ print(f"Bootstrap servers: {bootstrap_server}")
 
 try:
     consumer = KafkaConsumer(
-        'test-topic',
+        'network-traffic',
         bootstrap_servers=f"{bootstrap_server}:9094",
         auto_offset_reset='earliest',
         enable_auto_commit=True,

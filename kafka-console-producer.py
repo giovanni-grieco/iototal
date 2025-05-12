@@ -1,3 +1,4 @@
+#!.venv/bin/python
 from kafka import KafkaProducer
 import os
 

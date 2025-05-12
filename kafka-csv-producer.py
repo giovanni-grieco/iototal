@@ -1,13 +1,11 @@
+#!.venv/bin/python
+
 # this producer will read from a CSV file and send each row as a message to a certain topic
 # the message rate will be given by the user
-
 from kafka import KafkaProducer
 import os
 import sys
 import time
-
-kafka_server_bash_command = "kubectl get service iototal-kafka-controller-0-external --namespace default -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
-bootstrap_server = os.popen(kafka_server_bash_command).read().strip()
 
 if len(sys.argv) != 3:
     print(f"Usage: python {sys.argv[0]} path/to/csv delay-between-messages")
@@ -27,6 +25,11 @@ except ValueError:
     print(f"Delay {sys.argv[2]} is not a valid integer.")
     sys.exit(1)
 
+
+kafka_server_bash_command = "kubectl get service iototal-kafka-controller-0-external --namespace default -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+bootstrap_server = os.popen(kafka_server_bash_command).read().strip()
+bootstrap_server = f"{bootstrap_server}:9094"
+
 csv_file_path = sys.argv[1]
 delay = int(sys.argv[2])
 topic = "network-traffic"
@@ -36,7 +39,7 @@ print(f"Delay between messages: {delay} seconds")
 print(f"CSV file: {csv_file_path}")
 
 try:
-    producer = KafkaProducer(bootstrap_servers=f"{bootstrap_server}:9094")
+    producer = KafkaProducer(bootstrap_servers=bootstrap_server)
 
     while True:
         with open(csv_file_path, 'r') as file:
