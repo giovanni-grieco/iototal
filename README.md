@@ -9,11 +9,27 @@ A Big Data project for Università Roma Tre
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [helm](https://helm.sh/docs/intro/install/)
 - [pyspark - for submitting spark jobs](https://spark.apache.org/docs/latest/api/python/getting_started/install.html#using-pypi)
+
+#### Install pyspark
+It's suggested to create a venv in which to install pyspark:
+```bash
+python -m venv .venv
+```
+Activate the environment:
+```bash
+source .venv/bin/activate
+```
+And finally install the dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+
 ### Run
 #### To start the cluster
 ```bash
-./start-minikube.sh
-./start-cluster.sh
+./start-minikube.sh #will start a local k8s cluster
+./start-cluster.sh  #will start the needed services
 ```
 
 #### To submit a spark job
@@ -39,3 +55,8 @@ A Big Data project for Università Roma Tre
 [Submit to Spark on K8](https://spark.apache.org/docs/latest/running-on-kubernetes.html#submitting-applications-to-kubernetes)
 
 [Spark Streaming - Submitting Spark Job that interact with Kafka](https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html)
+
+
+## Dataset
+
+[IOTDataset](http://cicresearch.ca/IOTDataset/CIC_IOT_Dataset2023/Dataset/)
