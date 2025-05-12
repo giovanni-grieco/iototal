@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: spark-kubernetes-driver
+    volumeMounts:
+    - name: spark-job-volume
+      mountPath: /opt/spark/work-dir/job
+    - name: ivy-cache
+      mountPath: /home/spark/.ivy2
+    - name: spark-data-volume
+      mountPath: /spark-data
+  volumes:
+  - name: spark-job-volume
+    configMap:
+      name: spark-job-cm
+  - name : ivy-cache
+    emptyDir: {}
+  - name: spark-data-volume
+    hostPath:
+      path: /spark-data/
+      type: DirectoryOrCreate

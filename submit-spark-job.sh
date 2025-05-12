@@ -8,6 +8,10 @@ fi
 CLUSTER_IP=$(minikube ip)
 SPARK_JOB_FILE=$1
 
+MINIO_PORT=9000
+MINIO_HOST=$(kubectl get svc minio -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+MINIO_URL="http://$MINIO_HOST:$MINIO_PORT"
+
 if [ ! -f "$SPARK_JOB_FILE" ]; then
     echo "File $SPARK_JOB_FILE not found!"
     exit 1
@@ -21,6 +25,13 @@ echo "Creating ConfigMap from spark-job.py..."
 kubectl delete configmap spark-job-cm 2>/dev/null || true
 kubectl create configmap spark-job-cm --from-file=spark-job.py=$(pwd)/$SPARK_JOB_FILE
 
+# Create ConfigMap for MinIO credentials
+echo "Creating ConfigMap for MinIO credentials..."
+kubectl delete configmap minio-creds 2>/dev/null || true
+kubectl create configmap minio-creds \
+    --from-literal=MINIO_ROOT_USER=minioadmin \
+    --from-literal=MINIO_ROOT_PASSWORD=minioadmin
+
 # Submit the Spark job
 echo "Submitting Spark job..."
 spark-submit \
@@ -33,7 +44,8 @@ spark-submit \
     --conf spark.kubernetes.namespace=default \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
     --conf spark.kubernetes.authenticate.executor.serviceAccountName=spark \
-    --conf spark.kubernetes.driver.podTemplateFile=driver-pod-template.yaml \
+    --conf spark.kubernetes.driver.podTemplateFile=k8s/driver-pod-template.yaml \
+    --conf spark.kubernetes.executor.podTemplateFile=k8s/executor-pod-template.yaml \
     --conf spark.kubernetes.local.dirs.tmpfs=true \
     --conf spark.driver.memory=2g \
     --conf spark.executor.memory=2g \
@@ -45,4 +57,4 @@ spark-submit \
     --conf spark.sql.adaptive.coalescePartitions.enabled=true \
     local:///opt/spark/work-dir/job/spark-job.py
 
-echo "Job submitted. Check status with 'kubectl get pods'"
+echo "Job submitted. Check status with 'kubectl get all'"
