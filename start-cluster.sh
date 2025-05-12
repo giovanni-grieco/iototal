@@ -11,6 +11,7 @@ kubectl cluster-info
 
 kubectl create -f k8s/secrets.yaml
 kubectl apply -f k8s/minio-dev.yaml
+kubectl apply -f k8s/ivy-cache-volume.yaml
 
 helm install iototal oci://registry-1.docker.io/bitnamicharts/kafka \
     --set controller.automountServiceAccountToken=true \

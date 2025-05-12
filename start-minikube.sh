@@ -4,6 +4,8 @@ sudo -v
 #lancia minikube
 minikube start --memory=4096 --cpus=8 --disk-size=40G 
 
+minikube ssh "sudo mkdir -p /data/ivy-cache && sudo chown -R 185:185 /data/ivy-cache"
+
 #apre la dashboard in background
 minikube dashboard > dashboard.log 2>&1 &
 

@@ -1,2 +1,2 @@
-./clean-failed-spark-pods.sh
-./clean-successful-spark-pods.sh
+kubectl delete pod --field-selector=status.phase==Succeeded
+kubectl delete pod --field-selector=status.phase==Failed

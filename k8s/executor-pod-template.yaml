@@ -1,6 +1,18 @@
 apiVersion: v1
 kind: Pod
 spec:
+  initContainers:
+  - name: init-ivy-cache
+    image: busybox
+    securityContext:
+      runAsUser: 0
+    command: ["sh", "-c", "mkdir -p /home/spark/.ivy2/cache && chown -R 185:185 /home/spark/.ivy2"]
+    volumeMounts:
+    - name: ivy-cache
+      mountPath: /home/spark/.ivy2
+  securityContext:
+    runAsUser: 185
+    fsGroup: 185
   containers:
   - name: spark-kubernetes-executor
     volumeMounts:
@@ -29,4 +41,5 @@ spec:
     configMap:
       name: spark-job-cm
   - name : ivy-cache
-    emptyDir: {}
+    persistentVolumeClaim:
+      claimName: ivy-cache-volume-claim
