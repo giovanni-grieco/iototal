@@ -8,15 +8,25 @@ spec:
       mountPath: /opt/spark/work-dir/job
     - name: ivy-cache
       mountPath: /home/spark/.ivy2
-    - name: spark-data-volume
-      mountPath: /spark-data
+    env:
+      - name: S3_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: minio
+            key: accessKey
+      - name: S3_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: minio
+            key: secretKey
+      - name: S3_BUCKET_ENDPOINT
+        valueFrom:
+          secretKeyRef:
+            name: minio
+            key: endpoint
   volumes:
   - name: spark-job-volume
     configMap:
       name: spark-job-cm
   - name : ivy-cache
     emptyDir: {}
-  - name: spark-data-volume
-    hostPath:
-      path: /spark-data/
-      type: DirectoryOrCreate

@@ -9,8 +9,7 @@ kubectl cluster-info
 #serviceAccount.create=true
 #rbac.create=true
 
-kubectl create namespace iototal
-
+kubectl create -f k8s/secrets.yaml
 kubectl apply -f k8s/minio-dev.yaml
 
 helm install iototal oci://registry-1.docker.io/bitnamicharts/kafka \

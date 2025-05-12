@@ -25,19 +25,12 @@ echo "Creating ConfigMap from spark-job.py..."
 kubectl delete configmap spark-job-cm 2>/dev/null || true
 kubectl create configmap spark-job-cm --from-file=spark-job.py=$(pwd)/$SPARK_JOB_FILE
 
-# Create ConfigMap for MinIO credentials
-echo "Creating ConfigMap for MinIO credentials..."
-kubectl delete configmap minio-creds 2>/dev/null || true
-kubectl create configmap minio-creds \
-    --from-literal=MINIO_ROOT_USER=minioadmin \
-    --from-literal=MINIO_ROOT_PASSWORD=minioadmin
-
 # Submit the Spark job
 echo "Submitting Spark job..."
 spark-submit \
     --master k8s://https://$CLUSTER_IP:8443 \
     --deploy-mode cluster \
-    --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5 \
+    --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5,org.apache.hadoop:hadoop-aws:3.3.4 \
     --name iototal-spark \
     --conf spark.executor.instances=1 \
     --conf spark.kubernetes.container.image=apache/spark:latest \
