@@ -9,7 +9,12 @@ conf.setAll([
     ("spark.hadoop.fs.s3a.endpoint", os.environ.get("S3_BUCKET_ENDPOINT")),
     ("spark.hadoop.fs.s3a.path.style.access", "true"),
     ("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem"),
-    ("spark.hadoop.fs.s3a.connection.ssl.enabled", "false")
+    ("spark.hadoop.fs.s3a.connection.ssl.enabled", "false"),
+    ("spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version", "2"),
+    ("spark.hadoop.fs.s3a.fast.upload", "true"),
+    ("spark.hadoop.fs.s3a.fast.upload.buffer", "disk"),  # Use disk buffering for large files
+    ("spark.hadoop.fs.s3a.threads.max", "10"),  # Limit the number of threads
+    ("spark.hadoop.fs.s3a.connection.maximum", "10"), 
 ])
 
 def main():

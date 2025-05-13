@@ -8,7 +8,7 @@ import sys
 import time
 
 if len(sys.argv) != 3:
-    print(f"Usage: python {sys.argv[0]} path/to/csv delay-between-messages")
+    print(f"Usage: python {sys.argv[0]} path/to/file delay-between-messages")
     sys.exit(1)
 
 # valid path
@@ -30,24 +30,24 @@ kafka_server_bash_command = "kubectl get service iototal-kafka-controller-0-exte
 bootstrap_server = os.popen(kafka_server_bash_command).read().strip()
 bootstrap_server = f"{bootstrap_server}:9094"
 
-csv_file_path = sys.argv[1]
+file_path = sys.argv[1]
 delay = int(sys.argv[2])
 topic = "network-traffic"
 
 print(f"Bootstrap servers: {bootstrap_server}")
 print(f"Delay between messages: {delay} seconds")
-print(f"CSV file: {csv_file_path}")
+print(f"File: {file_path}")
 
 try:
     producer = KafkaProducer(bootstrap_servers=bootstrap_server)
 
     while True:
-        with open(csv_file_path, 'r') as file:
+        with open(file_path, 'r') as file:
             for line in file:
                 message = line.strip()
                 producer.send(topic, value=message.encode('utf-8'))
                 print(f"Sent: {message}")
-                time.sleep(1)
+                time.sleep(delay)
             break
     producer.flush()
     producer.close()
