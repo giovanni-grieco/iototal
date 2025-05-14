@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
 import os
+import datetime
 
 conf = SparkConf()
 conf.setAll([
@@ -20,7 +21,8 @@ conf.setAll([
 def main():
     #Test bucket by saving a file to it
     # Create a Spark session
-
+    date_time = datetime.datetime.now()
+    file_name = f"iototal-{date_time.strftime('%Y-%m-%d-%H-%M-%S')}.csv"
     spark = SparkSession.builder \
         .appName("Test Bucket") \
         .config(conf=conf) \
@@ -29,9 +31,9 @@ def main():
     data = [("Alice", 1), ("Bob", 2), ("Cathy", 3)]
     df = spark.createDataFrame(data, ["Name", "Id"])
     # Write the DataFrame to a CSV file in the S3 bucket
-    df.write.csv("s3a://iototal/test_data.csv", header=True)
+    df.write.csv(f"s3a://iototal/{file_name}", header=True)
     # Read the CSV file back into a DataFrame
-    df_read = spark.read.csv("s3a://iototal/test_data.csv", header=True)
+    df_read = spark.read.csv(f"s3a://iototal/{file_name}", header=True)
     # Show the contents of the DataFrame
     df_read.show()
     # Stop the Spark session
