@@ -13,6 +13,7 @@ kubectl create -f k8s/secrets.yaml
 kubectl apply -f k8s/minio-dev.yaml
 kubectl apply -f k8s/ivy-cache-volume.yaml
 
+# NOT PRODUCTION READY, PLAINTEXT
 helm install iototal oci://registry-1.docker.io/bitnamicharts/kafka \
     --set controller.automountServiceAccountToken=true \
     --set broker.automountServiceAccountToken=true \
@@ -24,7 +25,7 @@ helm install iototal oci://registry-1.docker.io/bitnamicharts/kafka \
     --set defaultInitContainers.autoDiscovery.enabled=true \
     --set serviceAccount.create=true \
     --set rbac.create=true \
-    --set listeners.client.protocol=plaintext \
+    --set listeners.client.protocol=plaintext \ 
     --set listeners.controller.protocol=plaintext \
     --set listeners.interbroker.protocol=plaintext \
     --set listeners.external.protocol=plaintext \

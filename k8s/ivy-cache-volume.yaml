@@ -42,6 +42,7 @@ spec:
     requests:
       storage: 10Gi
   storageClassName: ""
+  persistentVolumeReclaimPolicy: Retain
   volumeName: ivy-cache-volume
   
   

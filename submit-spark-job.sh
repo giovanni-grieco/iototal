@@ -8,10 +8,6 @@ fi
 CLUSTER_IP=$(minikube ip)
 SPARK_JOB_FILE=$1
 
-MINIO_PORT=9000
-MINIO_HOST=$(kubectl get svc minio -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-MINIO_URL="http://$MINIO_HOST:$MINIO_PORT"
-
 if [ ! -f "$SPARK_JOB_FILE" ]; then
     echo "File $SPARK_JOB_FILE not found!"
     exit 1
@@ -40,8 +36,8 @@ spark-submit \
     --conf spark.kubernetes.driver.podTemplateFile=k8s/driver-pod-template.yaml \
     --conf spark.kubernetes.executor.podTemplateFile=k8s/executor-pod-template.yaml \
     --conf spark.kubernetes.local.dirs.tmpfs=true \
-    --conf spark.driver.memory=4g \
-    --conf spark.executor.memory=4g \
+    --conf spark.driver.memory=1g \
+    --conf spark.executor.memory=1g \
     local:///opt/spark/work-dir/job/spark-job.py
 
 echo "Job submitted. Check status with 'kubectl get all'"
