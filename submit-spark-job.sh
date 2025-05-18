@@ -40,7 +40,7 @@ spark-submit \
     --conf spark.driver.memory=2g \
     --conf spark.driver.cores=2 \
     --conf spark.executor.memory=8g \
-    --conf spark.executor.cores=4 \
+    --conf spark.executor.cores=2 \
     local:///opt/spark/work-dir/job/spark-job.py
 
 echo "Job submitted. Check status with 'kubectl get all'"
