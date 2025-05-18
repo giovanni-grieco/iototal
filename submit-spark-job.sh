@@ -37,8 +37,10 @@ spark-submit \
     --conf spark.kubernetes.driver.podTemplateFile=k8s/driver-pod-template.yaml \
     --conf spark.kubernetes.executor.podTemplateFile=k8s/executor-pod-template.yaml \
     --conf spark.kubernetes.local.dirs.tmpfs=true \
-    --conf spark.driver.memory=1g \
-    --conf spark.executor.memory=6g \
+    --conf spark.driver.memory=2g \
+    --conf spark.driver.cores=2 \
+    --conf spark.executor.memory=8g \
+    --conf spark.executor.cores=4 \
     local:///opt/spark/work-dir/job/spark-job.py
 
 echo "Job submitted. Check status with 'kubectl get all'"

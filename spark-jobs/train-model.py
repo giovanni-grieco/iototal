@@ -20,6 +20,7 @@ conf.setAll([
     ("spark.hadoop.fs.s3a.fast.upload.buffer", "disk"),
     ("spark.hadoop.fs.s3a.threads.max", "10"),
     ("spark.hadoop.fs.s3a.connection.maximum", "10"),
+    ("spark.ui.showConsoleProgress", "true"),
 ])
 
 def main():
@@ -63,7 +64,7 @@ def main():
     train_data, test_data = data.randomSplit([0.8, 0.2], seed=42)
 
     # Train a Random Forest Classifier
-    rf = RandomForestClassifier(featuresCol="features", labelCol="label_indexed", numTrees=10, maxBins=200000, maxDepth=10)
+    rf = RandomForestClassifier(featuresCol="features", labelCol="label_indexed", numTrees=10, maxBins=150000, maxDepth=5)
     model = rf.fit(train_data)
 
     # Evaluate the model on the test set
