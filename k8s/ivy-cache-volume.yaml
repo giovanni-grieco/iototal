@@ -8,8 +8,6 @@ spec:
   hostPath:
     path: /data/ivy-cache
     type: DirectoryOrCreate
-
-
   # OR for NFS:
   # nfs:
   #   server: nfs-server.example.com
@@ -37,12 +35,10 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-
   resources:
     requests:
       storage: 10Gi
   storageClassName: ""
-  persistentVolumeReclaimPolicy: Retain
   volumeName: ivy-cache-volume
   
   
