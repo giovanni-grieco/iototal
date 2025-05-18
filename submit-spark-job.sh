@@ -5,7 +5,8 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-CLUSTER_IP=$(minikube ip)
+CLUSTER_IP=$(minikube ip) #replace with a remote kubernetes cluster IP if needed
+#CLUSTER_IP=<your_remote_cluster_ip>
 SPARK_JOB_FILE=$1
 
 if [ ! -f "$SPARK_JOB_FILE" ]; then
@@ -29,7 +30,7 @@ spark-submit \
     --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5,org.apache.hadoop:hadoop-aws:3.3.4 \
     --name iototal-spark \
     --conf spark.executor.instances=1 \
-    --conf spark.kubernetes.container.image=apache/spark:latest \
+    --conf spark.kubernetes.container.image=henderson43/spark-iototal:latest \
     --conf spark.kubernetes.namespace=default \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
     --conf spark.kubernetes.authenticate.executor.serviceAccountName=spark \
@@ -37,7 +38,7 @@ spark-submit \
     --conf spark.kubernetes.executor.podTemplateFile=k8s/executor-pod-template.yaml \
     --conf spark.kubernetes.local.dirs.tmpfs=true \
     --conf spark.driver.memory=1g \
-    --conf spark.executor.memory=1g \
+    --conf spark.executor.memory=6g \
     local:///opt/spark/work-dir/job/spark-job.py
 
 echo "Job submitted. Check status with 'kubectl get all'"
