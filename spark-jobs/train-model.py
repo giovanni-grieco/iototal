@@ -69,9 +69,33 @@ def main():
 
     # Evaluate the model on the test set
     predictions = model.transform(test_data)
+    
+    # Calculate accuracy
     evaluator = MulticlassClassificationEvaluator(labelCol="label_indexed", predictionCol="prediction", metricName="accuracy")
     accuracy = evaluator.evaluate(predictions)
     print(f"Test Accuracy: {accuracy}")
+
+    # Calculate precision
+    precision_evaluator = MulticlassClassificationEvaluator(labelCol="label_indexed", predictionCol="prediction", metricName="weightedPrecision")
+    precision = precision_evaluator.evaluate(predictions)
+    print(f"Test Precision: {precision}")
+
+    # Calculate recall
+    recall_evaluator = MulticlassClassificationEvaluator(labelCol="label_indexed", predictionCol="prediction", metricName="weightedRecall")
+    recall = recall_evaluator.evaluate(predictions)
+    print(f"Test Recall: {recall}")
+
+    # Calculate F1-score
+    f1_evaluator = MulticlassClassificationEvaluator(labelCol="label_indexed", predictionCol="prediction", metricName="f1")
+    f1_score = f1_evaluator.evaluate(predictions)
+    print(f"Test F1-Score: {f1_score}")
+
+    metrics_summary = {
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1_score": f1_score
+    }
 
     # Save the trained model to S3
     model_path = "s3a://iototal/random-forest-model"
