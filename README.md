@@ -43,6 +43,29 @@ pip install -r requirements.txt
 ./stop-minikube.sh
 ```
 
+## Secrets
+Make sure to create a secrets.yaml file for k8s following this template. As of now it's only used for declaring s3 bucket service secrets
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio
+  namespace: default
+  labels:
+    app: iototal
+type: Opaque
+data:
+  accessKey: bWluaW9hZG1pbg== #username (b64 encoding for 'minioadmin')
+  secretKey: bWluaW9hZG1pbg== #password (b64 encoding for 'minioadmin')
+  endpoint: aHR0cDovL21pbmlvLWhlYWRsZXNzOjkwMDA= #endpoint (b64 encoding for 'http://minio-headless:9000')
+```
+The secret data have to be in base64. In the example shown above, accessKey is the base64 encoding of 'minioadmin' which is the default minio password.
+
+To create base64 strings you can use a linux program directly in the terminal
+```bash
+echo -n "some-string-you-want-to-encode" | base64
+```
+
 ## Relevant documentation
 [Exposing services utilising Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fdebian+package#Service)
 
