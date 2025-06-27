@@ -1,9 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
-from pyspark.ml.classification import RandomForestClassificationModel
 from pyspark.sql.functions import col, split, trim, from_json, window, count, avg, collect_list, size
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
-from pyspark.ml.feature import VectorAssembler
 import os
 
 # Spark configuration
@@ -27,14 +25,11 @@ conf.setAll([
 def main():
     # Initialize Spark session
     spark = SparkSession.builder \
-        .appName("Iototal Network Monitor") \
+        .appName("Iototal Network Monitor - Data Test") \
         .config(conf=conf) \
         .getOrCreate()
 
-    # Load the pre-trained Random Forest model
-    model_path = "s3a://iototal/random-forest-model"
-    print(f"Loading model from {model_path}")
-    model = RandomForestClassificationModel.load(model_path)
+    print("Starting Kafka stream reader...")
 
     # Read from Kafka topic as a stream
     kafka_stream = spark \
@@ -43,6 +38,8 @@ def main():
         .option("kafka.bootstrap.servers", "iototal-kafka-controller-headless:9092") \
         .option("subscribe", "network-traffic") \
         .load()
+    
+    print("Kafka stream configured, processing messages...")
     
     # Extract the value from Kafka message and convert to string
     raw_data = kafka_stream.select(
@@ -105,61 +102,29 @@ def main():
         col("values")[39].alias("Label")
     )
     
-    # Prepare features for ML model (exclude Label and kafka_timestamp)
-    feature_cols = [col for col in parsed_data.columns if col not in ["kafka_timestamp", "Label"]]
+    # Just output the parsed data to console for testing
+    print("Setting up console output stream...")
     
-    # Create feature vector
-    assembler = VectorAssembler(
-        inputCols=feature_cols,
-        outputCol="features",
-        handleInvalid="skip"  # Skip rows with invalid values
-    )
-    
-    # Transform the data to create feature vectors
-    vectorized_data = assembler.transform(parsed_data)
-    
-    # Apply ML model for predictions
-    predictions = model.transform(vectorized_data)
-    
-    # Add window aggregation for analysis (5-minute windows)
-    windowed_analysis = predictions \
-        .withWatermark("kafka_timestamp", "10 minutes") \
-        .groupBy(
-            window(col("kafka_timestamp"), "5 minutes", "1 minute"),
-            col("prediction")
-        ) \
-        .agg(
-            count("*").alias("count"),
-            avg("Rate").alias("avg_rate"),
-            collect_list("Label").alias("actual_labels")
-        )
-    
-    # Output predictions to console for monitoring
-    prediction_query = predictions.select(
+    data_test_query = parsed_data.select(
         col("kafka_timestamp"),
-        col("prediction"),
-        col("Label"),
+        col("Header_Length"),
+        col("Protocol_Type"), 
         col("Rate"),
-        col("Protocol_Type")
+        col("TCP"),
+        col("UDP"),
+        col("Label")
     ).writeStream \
         .outputMode("append") \
         .format("console") \
         .option("truncate", False) \
-        .trigger(processingTime="30 seconds") \
+        .option("numRows", 10) \
+        .trigger(processingTime="10 seconds") \
         .start()
     
-    # Output windowed analysis
-    analysis_query = windowed_analysis.writeStream \
-        .outputMode("update") \
-        .format("console") \
-        .option("truncate", False) \
-        .trigger(processingTime="60 seconds") \
-        .start()
+    print("Stream started, waiting for data...")
     
     # Wait for termination
-    prediction_query.awaitTermination()
-    analysis_query.awaitTermination()
-
+    data_test_query.awaitTermination()
 
 
 if __name__ == "__main__":
