@@ -1,2 +1,5 @@
 kafka-python
 pyspark
+pandas
+numpy
+scikit-learn
