@@ -5,6 +5,7 @@ from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator
 from pyspark.ml.feature import StringIndexer
 import os
+import json
 
 # Spark configuration
 conf = SparkConf()
@@ -101,6 +102,11 @@ def main():
     model_path = "s3a://iototal/random-forest-model"
     print(f"Saving model to {model_path}")
     model.write().overwrite().save(model_path)
+
+    # Save the metrics summary to a JSON file
+    metrics_df = spark.createDataFrame([metrics_summary])
+    metrics_df.coalesce(1).write.format("json").mode("overwrite").save(model_path + "/metrics.json")
+
 
     # Stop the Spark session
     spark.stop()
