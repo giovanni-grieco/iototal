@@ -3,7 +3,7 @@ from pyspark import SparkConf
 from pyspark.ml.classification import RandomForestClassificationModel
 from pyspark.sql.functions import col, split, trim, from_json, window, count, avg, collect_list, size
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
-from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.feature import VectorAssembler, StringIndexer
 import os
 
 # Spark configuration
@@ -66,7 +66,7 @@ def main():
         col("values")[0].cast("double").alias("Header_Length"),
         col("values")[1].cast("int").alias("Protocol_Type"),
         col("values")[2].cast("double").alias("Time_To_Live"),
-        col("values")[3].cast("double").alias("Rate"),
+        col("values")[3].alias("Rate"), # Keep as string initially
         col("values")[4].cast("double").alias("fin_flag_number"),
         col("values")[5].cast("double").alias("syn_flag_number"),
         col("values")[6].cast("double").alias("rst_flag_number"),
@@ -105,62 +105,55 @@ def main():
         col("values")[39].alias("Label")
     )
     
-    # Prepare features for ML model (exclude Label and kafka_timestamp)
-    feature_cols = [col for col in parsed_data.columns if col not in ["kafka_timestamp", "Label"]]
+    # For streaming, we need to handle string columns differently
+    # Convert Rate to numeric using a simple mapping or hash
+    from pyspark.sql.functions import hash
+    
+    processed_data = parsed_data.select(
+        "*",
+        hash(col("Rate")).alias("Rate_indexed")
+    )
+    
+    # Prepare features for ML model (exclude kafka_timestamp, Label, and Rate)
+    feature_cols = [
+        "Header_Length", "Protocol_Type", "Time_To_Live", "Rate_indexed",
+        "fin_flag_number", "syn_flag_number", "rst_flag_number", "psh_flag_number",
+        "ack_flag_number", "ece_flag_number", "cwr_flag_number", "ack_count",
+        "syn_count", "fin_count", "rst_count", "HTTP", "HTTPS", "DNS", "Telnet",
+        "SMTP", "SSH", "IRC", "TCP", "UDP", "DHCP", "ARP", "ICMP", "IGMP", "IPv",
+        "LLC", "Tot_sum", "Min", "Max", "AVG", "Std", "Tot_size", "IAT", "Number",
+        "Variance"
+    ]
     
     # Create feature vector
     assembler = VectorAssembler(
         inputCols=feature_cols,
         outputCol="features",
-        handleInvalid="skip"  # Skip rows with invalid values
+        handleInvalid="skip"
     )
     
-    # Transform the data to create feature vectors
-    vectorized_data = assembler.transform(parsed_data)
+    # Define the streaming query
+    def process_batch(batch_df, batch_id):
+        if batch_df.count() > 0:
+            # Transform the data to create feature vectors
+            vectorized_data = assembler.transform(batch_df)
+            
+            # Apply ML model for predictions
+            predictions = model.transform(vectorized_data)
+            
+            # Show predictions
+            predictions.select(
+                "kafka_timestamp", "prediction", "Label", "Rate"
+            ).show(truncate=False)
     
-    # Apply ML model for predictions
-    predictions = model.transform(vectorized_data)
-    
-    # Add window aggregation for analysis (5-minute windows)
-    windowed_analysis = predictions \
-        .withWatermark("kafka_timestamp", "10 minutes") \
-        .groupBy(
-            window(col("kafka_timestamp"), "5 minutes", "1 minute"),
-            col("prediction")
-        ) \
-        .agg(
-            count("*").alias("count"),
-            avg("Rate").alias("avg_rate"),
-            collect_list("Label").alias("actual_labels")
-        )
-    
-    # Output predictions to console for monitoring
-    prediction_query = predictions.select(
-        col("kafka_timestamp"),
-        col("prediction"),
-        col("Label"),
-        col("Rate"),
-        col("Protocol_Type")
-    ).writeStream \
-        .outputMode("append") \
-        .format("console") \
-        .option("truncate", False) \
+    # Write stream using foreachBatch
+    query = processed_data.writeStream \
+        .foreachBatch(process_batch) \
         .trigger(processingTime="30 seconds") \
         .start()
     
-    # Output windowed analysis
-    analysis_query = windowed_analysis.writeStream \
-        .outputMode("update") \
-        .format("console") \
-        .option("truncate", False) \
-        .trigger(processingTime="60 seconds") \
-        .start()
-    
     # Wait for termination
-    prediction_query.awaitTermination()
-    analysis_query.awaitTermination()
-
-
+    query.awaitTermination()
 
 if __name__ == "__main__":
     main()

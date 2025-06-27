@@ -54,8 +54,10 @@ def main():
         indexer = StringIndexer(inputCol=col, outputCol=f"{col}_indexed", handleInvalid="skip")
         data = indexer.fit(data).transform(data)
 
-    # Replace original string columns with indexed columns
-    feature_columns = [f"{col}_indexed" if col in string_columns else col for col in data.columns if col != label_column_name]
+    # Replace original string columns with indexed columns - EXCLUDE label_indexed
+    feature_columns = [f"{col}_indexed" if col in string_columns else col 
+                      for col in data.columns 
+                      if col != label_column_name and col != "label_indexed"]
 
     # Assemble features into a single vector column
     assembler = VectorAssembler(inputCols=feature_columns, outputCol="features", handleInvalid="skip")
