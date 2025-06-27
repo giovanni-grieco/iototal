@@ -1,9 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
 from pyspark.ml.feature import VectorAssembler
-from pyspark.ml.classification import RandomForestClassifier
-from pyspark.ml.evaluation import MulticlassClassificationEvaluator
-from pyspark.ml.feature import StringIndexer
+from pyspark.ml.classification import RandomForestClassificationModel
 from pyspark.sql.types import StructType, StructField, DoubleType, IntegerType, StringType
 from pyspark.sql.functions import col, from_json
 import os
@@ -32,11 +30,8 @@ def main():
         .appName("Iototal Network Monitor") \
         .config(conf=conf) \
         .getOrCreate()
-    # Load model from S3
-    model_path = "s3a://iototal/random-forest-model"
-    print(f"Loading model from {model_path}")
-    model = RandomForestClassifier.load(model_path)
-     # Define the schema of the incoming Kafka messages
+
+    # Define the schema of the incoming Kafka messages - adding Label field
     schema = StructType([
         StructField("Header_Length", DoubleType(), True),
         StructField("Protocol Type", IntegerType(), True),
@@ -76,13 +71,14 @@ def main():
         StructField("Tot size", DoubleType(), True),
         StructField("IAT", DoubleType(), True),
         StructField("Number", IntegerType(), True),
-        StructField("Variance", DoubleType(), True)
+        StructField("Variance", DoubleType(), True),
+        StructField("label", StringType(), True)  # Added label field
     ])
 
     # Load the pre-trained Random Forest model
     model_path = "s3a://iototal/random-forest-model"
     print(f"Loading model from {model_path}")
-    model = RandomForestClassifier.load(model_path)
+    model = RandomForestClassificationModel.load(model_path)
 
     # Read from Kafka topic as a stream
     kafka_stream = spark \
@@ -96,7 +92,7 @@ def main():
     parsed_stream = kafka_stream.selectExpr("CAST(value AS STRING)") \
         .select(from_json(col("value"), schema).alias("data")) \
         .select("data.*")
-
+    
     # Assemble features into a single vector column
     feature_columns = [
         "Header_Length", "Protocol Type", "Time_To_Live", "fin_flag_number", "syn_flag_number",
@@ -105,19 +101,21 @@ def main():
         "SSH", "IRC", "TCP", "UDP", "DHCP", "ARP", "ICMP", "IGMP", "IPv", "LLC", "Tot sum", "Min",
         "Max", "AVG", "Std", "Tot size", "IAT", "Number", "Variance"
     ]
-    assembler = VectorAssembler(inputCols=feature_columns, outputCol="features")
+    # Changed outputCol from "prediction" to "features"
+    assembler = VectorAssembler(inputCols=feature_columns, outputCol="features", handleInvalid="skip")
     feature_stream = assembler.transform(parsed_stream)
 
     # Predict the label using the Random Forest model
     predictions = model.transform(feature_stream)
 
-    # Select relevant columns (e.g., features and prediction)
-    output_stream = predictions.select("features", "prediction")
+    # Select relevant columns including both predicted and actual labels
+    output_stream = predictions.select("features", "prediction", "label")
 
     # Write the output to the console in real time
     query = output_stream.writeStream \
         .outputMode("append") \
         .format("console") \
+        .option("truncate", "false") \
         .start()
 
     # Wait for the streaming query to finish
