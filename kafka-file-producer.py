@@ -38,12 +38,16 @@ print(f"Bootstrap servers: {bootstrap_server}")
 print(f"Delay between messages: {delay} seconds")
 print(f"File: {file_path}")
 
+first_line = True
 try:
     producer = KafkaProducer(bootstrap_servers=bootstrap_server)
 
     while True:
         with open(file_path, 'r') as file:
             for line in file:
+                if first_line:
+                    first_line = False
+                    continue
                 message = line.strip()
                 producer.send(topic, value=message.encode('utf-8'))
                 print(f"Sent: {message}")
