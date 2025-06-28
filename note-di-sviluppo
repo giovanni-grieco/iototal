@@ -1,3 +1,0 @@
-- capire come addestrare un modello in ambiente spark (e conseguentemente salvarlo su bucket s3)
-- capire come caricare un modello in ambiente spark (leggerlo da bucket s3)
-- capire come interagire tramite MLib in ambiente spark
