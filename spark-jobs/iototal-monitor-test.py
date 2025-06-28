@@ -31,6 +31,9 @@ def main():
         .config(conf=conf) \
         .getOrCreate()
 
+    # Set log level to WARN to reduce verbosity
+    spark.sparkContext.setLogLevel("WARN")
+
     # Load the pre-trained Random Forest model
     model_path = "s3a://iototal/random-forest-model"
     print(f"Loading model from {model_path}")
@@ -61,12 +64,11 @@ def main():
     )
     
     parsed_data = split_data.select(
-        col("kafka_timestamp"),
-        # Extract each column with proper type casting
+        # Extract each column with proper type casting - using same names as training
         col("values")[0].cast("double").alias("Header_Length"),
-        col("values")[1].cast("int").alias("Protocol_Type"),
+        col("values")[1].cast("int").alias("Protocol Type"),  # Changed to match training
         col("values")[2].cast("double").alias("Time_To_Live"),
-        col("values")[3].alias("Rate"), # Keep as string initially
+        col("values")[3].alias("Rate"), # Keep as string - will be indexed like in training
         col("values")[4].cast("double").alias("fin_flag_number"),
         col("values")[5].cast("double").alias("syn_flag_number"),
         col("values")[6].cast("double").alias("rst_flag_number"),
@@ -93,61 +95,59 @@ def main():
         col("values")[27].cast("double").alias("IGMP"),
         col("values")[28].cast("double").alias("IPv"),
         col("values")[29].cast("double").alias("LLC"),
-        col("values")[30].cast("int").alias("Tot_sum"),
+        col("values")[30].cast("int").alias("Tot sum"),  # Changed to match training
         col("values")[31].cast("int").alias("Min"),
         col("values")[32].cast("int").alias("Max"),
         col("values")[33].cast("double").alias("AVG"),
         col("values")[34].cast("double").alias("Std"),
-        col("values")[35].cast("double").alias("Tot_size"),
+        col("values")[35].cast("double").alias("Tot size"),  # Changed to match training
         col("values")[36].cast("double").alias("IAT"),
         col("values")[37].cast("int").alias("Number"),
         col("values")[38].cast("double").alias("Variance"),
         col("values")[39].alias("Label")
     )
     
-    # For streaming, we need to handle string columns differently
-    # Convert Rate to numeric using a simple mapping or hash
-    from pyspark.sql.functions import hash
-    
-    processed_data = parsed_data.select(
-        "*",
-        hash(col("Rate")).alias("Rate_indexed")
-    )
-    
-    # Prepare features for ML model (exclude kafka_timestamp, Label, and Rate)
-    feature_cols = [
-        "Header_Length", "Protocol_Type", "Time_To_Live", "Rate_indexed",
-        "fin_flag_number", "syn_flag_number", "rst_flag_number", "psh_flag_number",
-        "ack_flag_number", "ece_flag_number", "cwr_flag_number", "ack_count",
-        "syn_count", "fin_count", "rst_count", "HTTP", "HTTPS", "DNS", "Telnet",
-        "SMTP", "SSH", "IRC", "TCP", "UDP", "DHCP", "ARP", "ICMP", "IGMP", "IPv",
-        "LLC", "Tot_sum", "Min", "Max", "AVG", "Std", "Tot_size", "IAT", "Number",
-        "Variance"
-    ]
-    
-    # Create feature vector
-    assembler = VectorAssembler(
-        inputCols=feature_cols,
-        outputCol="features",
-        handleInvalid="skip"
-    )
-    
     # Define the streaming query
     def process_batch(batch_df, batch_id):
         if batch_df.count() > 0:
-            # Transform the data to create feature vectors
-            vectorized_data = assembler.transform(batch_df)
+            print(f"Processing batch {batch_id} with {batch_df.count()} records")
+            
+            # Apply the same preprocessing as in training
+            data = batch_df
+            label_column_name = "Label"
+            
+            # Identify string columns (excluding the label column)
+            string_columns = [col_name for col_name, dtype in data.dtypes if dtype == "string" and col_name != label_column_name]
+            print(f"String columns found: {string_columns}")
+            
+            # Convert string columns to numeric using StringIndexer (same as training)
+            for col_name in string_columns:
+                print(f"Converting string column: {col_name}")
+                indexer = StringIndexer(inputCol=col_name, outputCol=f"{col_name}_indexed", handleInvalid="skip")
+                data = indexer.fit(data).transform(data)
+            
+            # Replace original string columns with indexed columns - EXCLUDE Label
+            feature_columns = [f"{col_name}_indexed" if col_name in string_columns else col_name 
+                              for col_name in data.columns 
+                              if col_name != label_column_name and col_name != "kafka_timestamp"]
+            
+            print(f"Feature columns: {feature_columns}")
+            
+            # Assemble features into a single vector column (same as training)
+            assembler = VectorAssembler(inputCols=feature_columns, outputCol="features", handleInvalid="skip")
+            vectorized_data = assembler.transform(data)
             
             # Apply ML model for predictions
             predictions = model.transform(vectorized_data)
             
-            # Show predictions
+            # Show predictions with actual vs predicted labels
+            print("Predictions:")
             predictions.select(
-                "kafka_timestamp", "prediction", "Label", "Rate"
-            ).show(truncate=False)
+                "Label", "prediction", "Rate"
+            ).show(truncate=False, n=20)
     
     # Write stream using foreachBatch
-    query = processed_data.writeStream \
+    query = parsed_data.writeStream \
         .foreachBatch(process_batch) \
         .trigger(processingTime="30 seconds") \
         .start()
