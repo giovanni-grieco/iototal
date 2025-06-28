@@ -4,7 +4,7 @@ A Big Data project for Università degli Studi Roma Tre
 ## Description
 iototal is a (near) real-time network traffic classifier that tells the user whether traffic is benign or not
 
-#Logic Architecture
+## Logic Architecture
 ![big-data-system drawio](https://github.com/user-attachments/assets/48f1531f-e171-4e50-bc98-d7bb223b856c)
 
 
