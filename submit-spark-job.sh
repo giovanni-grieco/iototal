@@ -38,7 +38,7 @@ spark-submit \
     --conf spark.kubernetes.executor.podTemplateFile=k8s/executor-pod-template.yaml \
     --conf spark.kubernetes.local.dirs.tmpfs=true \
     --conf spark.driver.memory=4g \
-    --conf spark.driver.cores=2 \
+    --conf spark.driver.cores=4 \
     --conf spark.executor.memory=8g \
     --conf spark.executor.cores=4 \
     local:///opt/spark/work-dir/job/spark-job.py
