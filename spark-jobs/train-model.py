@@ -31,6 +31,7 @@ def main():
         .config(conf=conf) \
         .getOrCreate()
 
+    spark.sparkContext.setLogLevel("WARN")
     # Load the dataset from S3
     s3_path = "s3a://iototal/Merged01.csv"
     print(f"Loading dataset from {s3_path}")

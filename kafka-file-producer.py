@@ -18,11 +18,11 @@ if not os.path.exists(sys.argv[1]):
 
 # valid delay
 try:
-    delay = int(sys.argv[2])
+    delay = float(sys.argv[2])
     if delay < 0:
         raise ValueError
 except ValueError:
-    print(f"Delay {sys.argv[2]} is not a valid integer.")
+    print(f"Delay {sys.argv[2]} is not a valid float.")
     sys.exit(1)
 
 
@@ -31,7 +31,7 @@ bootstrap_server = os.popen(kafka_server_bash_command).read().strip()
 bootstrap_server = f"{bootstrap_server}:9094"
 
 file_path = sys.argv[1]
-delay = int(sys.argv[2])
+delay = float(sys.argv[2])
 topic = "network-traffic"
 
 print(f"Bootstrap servers: {bootstrap_server}")

@@ -1,7 +1,9 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
-from pyspark.sql.functions import col, split, trim, from_json, window, count, avg, collect_list, size
+from pyspark.ml.classification import RandomForestClassificationModel
+from pyspark.sql.functions import col, split, trim, from_json, window, count, avg, collect_list, size, to_json, struct, current_timestamp
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
+from pyspark.ml.feature import VectorAssembler, StringIndexer
 import os
 
 # Spark configuration
@@ -25,11 +27,17 @@ conf.setAll([
 def main():
     # Initialize Spark session
     spark = SparkSession.builder \
-        .appName("Iototal Network Monitor - Data Test") \
+        .appName("Iototal Network Monitor") \
         .config(conf=conf) \
         .getOrCreate()
 
-    print("Starting Kafka stream reader...")
+    # Set log level to WARN to reduce verbosity
+    spark.sparkContext.setLogLevel("WARN")
+
+    # Load the pre-trained Random Forest model
+    model_path = "s3a://iototal/random-forest-model"
+    print(f"Loading model from {model_path}")
+    model = RandomForestClassificationModel.load(model_path)
 
     # Read from Kafka topic as a stream
     kafka_stream = spark \
@@ -38,8 +46,6 @@ def main():
         .option("kafka.bootstrap.servers", "iototal-kafka-controller-headless:9092") \
         .option("subscribe", "network-traffic") \
         .load()
-    
-    print("Kafka stream configured, processing messages...")
     
     # Extract the value from Kafka message and convert to string
     raw_data = kafka_stream.select(
@@ -59,11 +65,11 @@ def main():
     
     parsed_data = split_data.select(
         col("kafka_timestamp"),
-        # Extract each column with proper type casting
+        # Extract each column with proper type casting - using same names as training
         col("values")[0].cast("double").alias("Header_Length"),
-        col("values")[1].cast("int").alias("Protocol_Type"),
+        col("values")[1].cast("int").alias("Protocol Type"),
         col("values")[2].cast("double").alias("Time_To_Live"),
-        col("values")[3].cast("double").alias("Rate"),
+        col("values")[3].alias("Rate"), # Keep as string - will be indexed like in training
         col("values")[4].cast("double").alias("fin_flag_number"),
         col("values")[5].cast("double").alias("syn_flag_number"),
         col("values")[6].cast("double").alias("rst_flag_number"),
@@ -90,42 +96,81 @@ def main():
         col("values")[27].cast("double").alias("IGMP"),
         col("values")[28].cast("double").alias("IPv"),
         col("values")[29].cast("double").alias("LLC"),
-        col("values")[30].cast("int").alias("Tot_sum"),
+        col("values")[30].cast("int").alias("Tot sum"),
         col("values")[31].cast("int").alias("Min"),
         col("values")[32].cast("int").alias("Max"),
         col("values")[33].cast("double").alias("AVG"),
         col("values")[34].cast("double").alias("Std"),
-        col("values")[35].cast("double").alias("Tot_size"),
+        col("values")[35].cast("double").alias("Tot size"),
         col("values")[36].cast("double").alias("IAT"),
         col("values")[37].cast("int").alias("Number"),
         col("values")[38].cast("double").alias("Variance"),
         col("values")[39].alias("Label")
     )
     
-    # Just output the parsed data to console for testing
-    print("Setting up console output stream...")
+    # Define the streaming query
+    def process_batch(batch_df, batch_id):
+        if batch_df.count() > 0:
+            print(f"Processing batch {batch_id} with {batch_df.count()} records")
+            
+            # Apply the same preprocessing as in training
+            data = batch_df
+            label_column_name = "Label"
+            
+            # Identify string columns (excluding the label column)
+            string_columns = [col_name for col_name, dtype in data.dtypes if dtype == "string" and col_name != label_column_name and col_name != "kafka_timestamp"]
+            print(f"String columns found: {string_columns}")
+            
+            # Convert string columns to numeric using StringIndexer (same as training)
+            for col_name in string_columns:
+                print(f"Converting string column: {col_name}")
+                indexer = StringIndexer(inputCol=col_name, outputCol=f"{col_name}_indexed", handleInvalid="skip")
+                data = indexer.fit(data).transform(data)
+            
+            # Replace original string columns with indexed columns - EXCLUDE Label
+            feature_columns = [f"{col_name}_indexed" if col_name in string_columns else col_name 
+                              for col_name in data.columns 
+                              if col_name != label_column_name and col_name != "kafka_timestamp"]
+            
+            print(f"Feature columns: {feature_columns}")
+            
+            # Assemble features into a single vector column (same as training)
+            assembler = VectorAssembler(inputCols=feature_columns, outputCol="features", handleInvalid="skip")
+            vectorized_data = assembler.transform(data)
+            
+            # Apply ML model for predictions
+            predictions = model.transform(vectorized_data)
+            
+            # Prepare data for Kafka publishing
+            kafka_output = predictions.select(
+                to_json(struct(
+                    col("kafka_timestamp").alias("original_timestamp"),
+                    col("Label").alias("actual_label"),
+                    col("prediction").alias("predicted_label"),
+                    col("Rate").alias("rate"),
+                    col("Header_Length").alias("header_length"),
+                    col("Protocol Type").alias("protocol_type"),
+                    current_timestamp().alias("prediction_timestamp")
+                )).alias("value")
+            )
+            
+            # Write to Kafka predictions topic
+            kafka_output.write \
+                .format("kafka") \
+                .option("kafka.bootstrap.servers", "iototal-kafka-controller-headless:9092") \
+                .option("topic", "network-predictions") \
+                .save()
+            
+            print(f"Published {kafka_output.count()} predictions to Kafka topic 'network-predictions'")
     
-    data_test_query = parsed_data.select(
-        col("kafka_timestamp"),
-        col("Header_Length"),
-        col("Protocol_Type"), 
-        col("Rate"),
-        col("TCP"),
-        col("UDP"),
-        col("Label")
-    ).writeStream \
-        .outputMode("append") \
-        .format("console") \
-        .option("truncate", False) \
-        .option("numRows", 10) \
-        .trigger(processingTime="10 seconds") \
+    # Write stream using foreachBatch
+    query = parsed_data.writeStream \
+        .foreachBatch(process_batch) \
+        .trigger(processingTime="5 seconds") \
         .start()
     
-    print("Stream started, waiting for data...")
-    
     # Wait for termination
-    data_test_query.awaitTermination()
-
+    query.awaitTermination()
 
 if __name__ == "__main__":
     main()

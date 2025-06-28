@@ -149,7 +149,7 @@ def main():
     # Write stream using foreachBatch
     query = parsed_data.writeStream \
         .foreachBatch(process_batch) \
-        .trigger(processingTime="30 seconds") \
+        .trigger(processingTime="5 seconds") \
         .start()
     
     # Wait for termination
