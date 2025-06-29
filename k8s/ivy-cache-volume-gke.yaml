@@ -1,0 +1,20 @@
+# For GKE with emptyDir ivy cache, we don't need persistent volumes
+# Each Spark pod will have its own independent ivy cache using emptyDir
+# This file is kept for reference but not used
+
+# If you still want to use persistent storage for ivy cache (not recommended for GKE),
+# you would need to use ReadWriteMany storage class like NFS or Google Filestore:
+
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: ivy-cache-volume-claim
+#   labels:
+#     app: iototal
+# spec:
+#   accessModes:
+#     - ReadWriteMany  # Requires NFS or Filestore
+#   resources:
+#     requests:
+#       storage: 10Gi
+#   storageClassName: "filestore-csi"  # Or your NFS storage class

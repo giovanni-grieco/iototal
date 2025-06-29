@@ -94,7 +94,8 @@ spec:
   - metadata:
       name: data
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes: [ "ReadWriteOnce" ]  # Changed from ReadWriteMany for GKE compatibility
+      storageClassName: "standard-rwo"  # Explicitly specify GKE storage class
       resources:
         requests:
           storage: 10Gi

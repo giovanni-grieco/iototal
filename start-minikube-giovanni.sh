@@ -2,7 +2,7 @@
 sudo -v
 
 #lancia minikube
-minikube start --memory=26000 --cpus=8 --disk-size=40G 
+minikube start --memory=24000 --cpus=14 --disk-size=40G 
 
 minikube ssh "sudo mkdir -p /data/ivy-cache && sudo chown -R 185:185 /data/ivy-cache"
 
