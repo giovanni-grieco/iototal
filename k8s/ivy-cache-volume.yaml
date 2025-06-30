@@ -1,32 +1,4 @@
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: ivy-cache-volume
-  labels:
-    app: iototal
-spec:
-  hostPath:
-    path: /data/ivy-cache
-    type: DirectoryOrCreate
-  # OR for NFS:
-  # nfs:
-  #   server: nfs-server.example.com
-  #   path: "/exported/path"
-  
-  # OR for cloud providers:
-  # awsElasticBlockStore:
-  #   volumeID: <volume-id>
-  #   fsType: ext4
-  
-  # OR for local testing with emptyDir (data will be lost on pod restarts):
-  # emptyDir: {}
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ivy-cache-volume-claim
@@ -40,5 +12,21 @@ spec:
       storage: 10Gi
   storageClassName: ""
   volumeName: ivy-cache-volume
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ivy-cache-volume
+  labels:
+    app: iototal
+spec:
+  hostPath:
+    path: /data/ivy-cache
+    type: DirectoryOrCreate
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
   
   
