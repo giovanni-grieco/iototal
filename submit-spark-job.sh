@@ -29,7 +29,7 @@ spark-submit \
     --deploy-mode cluster \
     --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5,org.apache.hadoop:hadoop-aws:3.3.4 \
     --name iototal-spark \
-    --conf spark.executor.instances=2 \
+    --conf spark.executor.instances=1 \
     --conf spark.kubernetes.container.image=henderson43/spark-iototal:latest \
     --conf spark.kubernetes.namespace=default \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
@@ -39,8 +39,8 @@ spark-submit \
     --conf spark.kubernetes.local.dirs.tmpfs=true \
     --conf spark.driver.memory=4g \
     --conf spark.driver.cores=4 \
-    --conf spark.executor.memory=8g \
-    --conf spark.executor.cores=4 \
+    --conf spark.executor.memory=16g \
+    --conf spark.executor.cores=10 \
     local:///opt/spark/work-dir/job/spark-job.py
 
 echo "Job submitted. Check status with 'kubectl get all'"
