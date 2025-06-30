@@ -4,7 +4,7 @@
 PROJECT_ID="amiable-alcove-464414-m1"  # Replace with your actual GCP project ID
 CLUSTER_NAME="iototal-cluster"
 ZONE="europe-west1-b"  # Choose your preferred zone
-NODE_COUNT=3
+NODE_COUNT=5
 MACHINE_TYPE="e2-standard-4"  # 4 vCPU, 16GB RAM
 DISK_SIZE="50GB"
 
