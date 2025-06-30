@@ -45,7 +45,14 @@ def main():
 
     # Convert the label column to numeric using StringIndexer
     label_indexer = StringIndexer(inputCol=label_column_name, outputCol="label_indexed", handleInvalid="skip")
-    data = label_indexer.fit(data).transform(data)
+    label_indexer_model = label_indexer.fit(data)
+    data = label_indexer_model.transform(data)
+    
+    # Get the label mapping (index -> original string value)
+    label_mapping = {i: label for i, label in enumerate(label_indexer_model.labels)}
+    print("Label mapping (index -> original):")
+    for index, original_label in label_mapping.items():
+        print(f"  {index} -> {original_label}")
 
     # Identify string columns (excluding the label column)
     string_columns = [col for col, dtype in data.dtypes if dtype == "string" and col != label_column_name]
@@ -98,13 +105,19 @@ def main():
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
-        "f1_score": f1_score
+        "f1_score": f1_score,
+        "label_mapping": label_mapping
     }
 
     # Save the trained model to S3
     model_path = "s3a://iototal/random-forest-model"
     print(f"Saving model to {model_path}")
     model.write().overwrite().save(model_path)
+
+    # Save the label indexer model (to use for inverse transformation later)
+    label_indexer_path = model_path + "/label_indexer"
+    print(f"Saving label indexer to {label_indexer_path}")
+    label_indexer_model.write().overwrite().save(label_indexer_path)
 
     # Save the metrics summary to a JSON file
     metrics_df = spark.createDataFrame([metrics_summary])
