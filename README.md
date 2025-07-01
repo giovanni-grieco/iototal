@@ -7,15 +7,16 @@ iototal is a (near) real-time network traffic classifier that tells the user whe
 ## Logic Architecture
 ![big-data-system drawio](https://github.com/user-attachments/assets/48f1531f-e171-4e50-bc98-d7bb223b856c)
 
-
-## Local execution
-
-### Requirements
+## Requirements
 - [docker](https://docs.docker.com/get-started/get-docker/) or [docker-engine](https://docs.docker.com/engine/install/)
-- [minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [helm](https://helm.sh/docs/intro/install/)
 - [pyspark - for submitting spark jobs](https://spark.apache.org/docs/latest/api/python/getting_started/install.html#using-pypi)
+
+### Local execution
+- [minikube](https://minikube.sigs.k8s.io/docs/start/)
+
+### Google Kubernetes Engine execution
 - [gcloud](https://cloud.google.com/sdk/docs/install#linux) and [gke-gcloud-auth-plugin](https://cloud.google.com/sdk/docs/install#linux) (both needed if you want to deploy to GKE otherwise optional if you want to run locally)
 
 #### Install python dependencies (including pyspark)
@@ -32,8 +33,10 @@ And finally install the dependencies:
 pip install -r requirements.txt
 ```
 
+## Run iototal
 
-### Run
+### Run locally
+
 #### To start the cluster
 ```bash
 ./start-minikube.sh #will start a local k8s cluster
@@ -49,6 +52,23 @@ pip install -r requirements.txt
 ```bash
 ./stop-cluster.sh
 ./stop-minikube.sh
+```
+
+### Run on GKE
+
+#### To start the GKE cluster and allocate pods
+```bash
+./start-gke-cluster.sh  #it will allocate a new cluster on GKE and start iototal services
+```
+
+#### To submit a spark job
+```bash
+./submit-spark-job-gke.sh path/to/job 
+```
+
+#### To stop the cluster
+```bash
+./stop-gke-cluster.sh
 ```
 
 ## Secrets
