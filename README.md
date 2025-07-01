@@ -16,7 +16,7 @@ iototal is a (near) real-time network traffic classifier that tells the user whe
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [helm](https://helm.sh/docs/intro/install/)
 - [pyspark - for submitting spark jobs](https://spark.apache.org/docs/latest/api/python/getting_started/install.html#using-pypi)
-- [gcloud](https://cloud.google.com/sdk/docs/install#linux) (optional)
+- [gcloud](https://cloud.google.com/sdk/docs/install#linux) and [gke-gcloud-auth-plugin](https://cloud.google.com/sdk/docs/install#linux) (both needed if you want to deploy to GKE otherwise optional if you want to run locally)
 
 #### Install python dependencies (including pyspark)
 It's suggested to create a venv in which to install pyspark:
