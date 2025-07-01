@@ -264,7 +264,10 @@ class KafkaSnifferProducer:
     def connect_kafka(self):
         """Initialize Kafka producer"""
         try:
-            self.producer = KafkaProducer(bootstrap_servers=self.kafka_servers)
+            self.producer = KafkaProducer(
+                bootstrap_servers=self.kafka_servers,
+                value_serializer=lambda v: v.encode('utf-8') if isinstance(v, str) else v
+            )
             print(f"Connected to Kafka: {self.kafka_servers}")
             return True
         except Exception as e:
@@ -283,14 +286,26 @@ class KafkaSnifferProducer:
                 
                 # Send to Kafka
                 if self.producer:
-                    self.producer.send(self.topic, value=csv_line)
-                    self.packet_count += 1
-                    
-                    if self.packet_count % 100 == 0:
-                        print(f"Processed {self.packet_count} packets")
+                    try:
+                        future = self.producer.send(self.topic, value=csv_line)
+                        # Optional: wait for send to complete
+                        # future.get(timeout=1)
+                        self.packet_count += 1
+                        
+                        if self.packet_count % 100 == 0:
+                            print(f"Processed {self.packet_count} packets")
+                    except Exception as kafka_error:
+                        print(f"Kafka send error: {kafka_error}")
+                        print(f"CSV line: {csv_line[:100]}...")  # First 100 chars
+                else:
+                    print("Producer not initialized")
                         
         except Exception as e:
+            import traceback
             print(f"Error processing packet: {e}")
+            print(f"Error type: {type(e).__name__}")
+            print(f"Traceback: {traceback.format_exc()}")
+            print(f"Packet details: {packet.summary()}")
     
     def features_to_csv(self, features):
         """Convert features dictionary to CSV line"""
