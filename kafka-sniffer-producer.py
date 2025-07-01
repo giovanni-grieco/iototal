@@ -359,7 +359,7 @@ def get_kafka_server():
 def main():
     parser = argparse.ArgumentParser(description='Network Packet Sniffer for IoT Security')
     parser.add_argument('--interface', '-i', help='Network interface to capture (default: auto)')
-    parser.add_argument('--kafka-server', '-k', help='Kafka server address (default: auto-detect)')
+    parser.add_argument('--kafka-server', '-k', help='Kafka server address (default: localhost)')
     parser.add_argument('--topic', '-t', default='network-traffic', help='Kafka topic (default: network-traffic)')
     parser.add_argument('--window', '-w', type=int, default=60, help='Flow window size in seconds (default: 60)')
     
