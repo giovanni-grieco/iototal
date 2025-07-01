@@ -6,3 +6,4 @@ scikit-learn
 setuptools
 matplotlib
 streamlit
+scapy
