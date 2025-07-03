@@ -5,7 +5,8 @@ A Big Data project for Università degli Studi Roma Tre
 iototal is a (near) real-time network traffic classifier that tells the user whether traffic is benign or not
 
 ## Logic Architecture
-![big-data-system drawio](https://github.com/user-attachments/assets/48f1531f-e171-4e50-bc98-d7bb223b856c)
+![big-data-system drawio](https://github.com/user-attachments/assets/244b690b-2da5-445d-83db-7727734b7aae)
+
 
 ## Requirements
 - [docker](https://docs.docker.com/get-started/get-docker/) or [docker-engine](https://docs.docker.com/engine/install/)
